@@ -1,11 +1,11 @@
 package com.example.virat.shukla.androidproficiency;
 
-public class InnerClass {
+public class InnerRowsClass {
     private String title;
     private String description;
     private String imageHref;
 
-    InnerClass(String title, String description, String imageHref) {
+    InnerRowsClass(String title, String description, String imageHref) {
         this.title = title;
         this.description = description;
         this.imageHref = imageHref;

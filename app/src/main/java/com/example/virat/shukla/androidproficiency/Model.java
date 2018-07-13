@@ -2,9 +2,9 @@ package com.example.virat.shukla.androidproficiency;
 
 public class Model {
     private String title;
-    private InnerClass[] rows;
+    private InnerRowsClass[] rows;
 
-    public Model(String title, InnerClass[] rows) {
+    public Model(String title, InnerRowsClass[] rows) {
         this.title = title;
         this.rows = rows;
     }
@@ -17,11 +17,11 @@ public class Model {
         this.title = title;
     }
 
-    public InnerClass[] getRows() {
+    public InnerRowsClass[] getRows() {
         return rows;
     }
 
-    public void setRows(InnerClass[] rows) {
+    public void setRows(InnerRowsClass[] rows) {
         this.rows = rows;
     }
 

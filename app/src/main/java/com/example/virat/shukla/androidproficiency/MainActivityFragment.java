@@ -1,28 +1,34 @@
 package com.example.virat.shukla.androidproficiency;
 
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivityFragment extends Fragment {
     RecyclerView recyclerView;
@@ -30,6 +36,9 @@ public class MainActivityFragment extends Fragment {
     final String URL = "https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl/facts.json";
     final String TAG = "volley_request_tag";
     RequestQueue queue;
+    ProgressBar progressBar;
+    TextView errorText;
+    Toolbar toolbar;
 
     public MainActivityFragment() {
     }
@@ -38,73 +47,102 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
+        toolbar = view.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        progressBar = view.findViewById(R.id.progressBar);
+        errorText = view.findViewById(R.id.no_internet);
         recyclerView = view.findViewById(R.id.recycler_view);
-        adapter = new MyAdapter(getContext());
+        adapter = new MyAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        setupVolleyRequestQueue();
+        FloatingActionButton fab = view.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setupVolleyRequestQueue();
+            }
+        });
 
-        populateAdapter();
+//      check if network is available or not
+        if (isNetworkAvailable()) {
+//          using Volley library to download data from link
+            setupVolleyRequestQueue();
+        } else {
+            recyclerView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            errorText.setVisibility(View.VISIBLE);
+        }
+
+
         return view;
     }
 
     private void setupVolleyRequestQueue() {
-        queue = Volley.newRequestQueue(getActivity());
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, URL, null, new Response.Listener<JSONObject>() {
+        if (null != getContext()) {
+            if (queue != null) {
+                queue.cancelAll(TAG);
+            }
+            queue = Volley.newRequestQueue(getContext());
+            progressBar.setVisibility(View.VISIBLE);
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                    (Request.Method.GET, URL, null, new Response.Listener<JSONObject>() {
 
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.e("TAG", response.toString());
-                    }
-                }, new Response.ErrorListener() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            recyclerView.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.GONE);
+                            errorText.setVisibility(View.GONE);
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+//                          Map JSON data into objects
+                            Gson gson = new Gson();
+                            Model model = gson.fromJson(response.toString(), Model.class);
+                            InnerRowsClass[] listOfRows = model.getRows();
+                            List<InnerRowsClass> newList = new ArrayList<>();
 
-                    }
-                });
-        jsonObjectRequest.setTag(TAG);
-        queue.add(jsonObjectRequest);
-    }
+                            // check if there is any empty object, if any, remove them
+                            for (InnerRowsClass i : listOfRows) {
+                                if (!(null == i.getTitle() && null == i.getDescription() && null == i.getImageHref())) {
+                                    newList.add(i);
+                                }
+                            }
 
-    private void populateAdapter() {
-        InnerClass[] data = new InnerClass[10];
-        data[0] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
+//                          update the adapter data
+                            adapter.swapData(newList);
 
-        data[1] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
+                            toolbar.setTitle(model.getTitle());
+                        }
+                    }, new Response.ErrorListener() {
 
-        data[2] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
-
-        data[3] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
-
-        data[4] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
-
-        data[5] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
-
-        data[6] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
-
-        data[7] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
-
-        data[8] = new InnerClass("Housing", "Warmer than you might think.",
-                "http://icons.iconarchive.com/icons/iconshock/alaska/256/Igloo-icon.png");
-        adapter.swapData(data);
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            progressBar.setVisibility(View.GONE);
+                            errorText.setVisibility(View.VISIBLE);
+                        }
+                    });
+            jsonObjectRequest.setTag(TAG);
+            queue.add(jsonObjectRequest);
+        }
     }
 
     @Override
-    public void onStop () {
+    public void onStop() {
         super.onStop();
         if (queue != null) {
             queue.cancelAll(TAG);
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        if (null != getContext()) {
+            ConnectivityManager connectivityManager
+                    = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = null;
+            if (connectivityManager != null) {
+                activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            }
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
+        return false;
     }
 }

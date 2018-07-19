@@ -1,4 +1,4 @@
-package com.example.virat.shukla.androidproficiency;
+package com.example.virat.shukla.androidproficiency.model;
 
 public class InnerRowsClass {
     private String title;

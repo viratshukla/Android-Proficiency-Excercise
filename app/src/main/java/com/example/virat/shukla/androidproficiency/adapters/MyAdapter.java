@@ -1,4 +1,4 @@
-package com.example.virat.shukla.androidproficiency;
+package com.example.virat.shukla.androidproficiency.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.virat.shukla.androidproficiency.model.InnerRowsClass;
+import com.example.virat.shukla.androidproficiency.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -16,11 +18,10 @@ import java.util.List;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private List<InnerRowsClass> list = new ArrayList<>();
 
-    void swapData(List<InnerRowsClass> updatedList) {
+    public void swapData(List<InnerRowsClass> updatedList) {
         list = updatedList;
         notifyDataSetChanged();
     }
-
 
     @NonNull
     @Override
@@ -48,7 +49,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             } else {
                 holder.mImage.setImageResource(R.drawable.default_image);
             }
-
         }
     }
 
